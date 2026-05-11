@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ThorX",
+  "version": "0.1.0",
+  "identifier": "com.thorx.desktop",
+  "build": {
+    "beforeDevCommand": "pnpm --filter @thorx/ui dev",
+    "beforeBuildCommand": "pnpm --filter @thorx/ui build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../../ui/dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "ThorX",
+        "width": 1320,
+        "height": 860,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "copyright": "Built on top of OpenAI Codex (Apache-2.0)."
+  }
+}
