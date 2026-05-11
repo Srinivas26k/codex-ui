@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { starterSkillCatalog } from '@thorx/domain';
 import {
   canSubmit,
   createInitialState,
@@ -6,7 +7,8 @@ import {
   prevStep,
   updateCapabilities,
   updateIdentity,
-  updateMemory
+  updateMemory,
+  toggleCapabilitySkill
 } from './wizard';
 
 describe('wizard step movement', () => {
@@ -41,5 +43,22 @@ describe('wizard state updates', () => {
   it('fails submission with invalid memory topK', () => {
     const state = updateMemory(createInitialState(), { topK: 999 });
     expect(canSubmit(state)).toBe(false);
+  });
+
+  it('attaches and removes starter skills', () => {
+    const skillId = starterSkillCatalog[1].id;
+    const attached = toggleCapabilitySkill(createInitialState(), skillId);
+    expect(attached.spec.capabilities.skills).toContain(skillId);
+
+    const detached = toggleCapabilitySkill(attached, skillId);
+    expect(detached.spec.capabilities.skills).not.toContain(skillId);
+  });
+
+  it('deduplicates capability skills during updates', () => {
+    const state = updateCapabilities(createInitialState(), {
+      skills: ['summarization', 'summarization', 'web-research-brief']
+    });
+
+    expect(state.spec.capabilities.skills).toEqual(['summarization', 'web-research-brief']);
   });
 });

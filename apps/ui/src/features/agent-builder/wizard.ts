@@ -1,4 +1,10 @@
-import { AgentSpec, createDefaultAgentSpec, validateAgentSpec } from '@thorx/domain';
+import {
+  AgentSpec,
+  createDefaultAgentSpec,
+  normalizeSkillIds,
+  toggleSkillId,
+  validateAgentSpec
+} from '@thorx/domain';
 
 export type WizardStepId =
   | 'identity'
@@ -83,6 +89,7 @@ export function updateCapabilities(
     tools?: Partial<AgentSpec['capabilities']['tools']>;
   }
 ): AgentBuilderState {
+  const hasSkillsOverride = Object.prototype.hasOwnProperty.call(values, 'skills');
   return {
     ...state,
     spec: {
@@ -90,6 +97,7 @@ export function updateCapabilities(
       capabilities: {
         ...state.spec.capabilities,
         ...values,
+        skills: hasSkillsOverride ? normalizeSkillIds(values.skills ?? []) : state.spec.capabilities.skills,
         tools: {
           ...state.spec.capabilities.tools,
           ...(values.tools ?? {})
@@ -97,6 +105,29 @@ export function updateCapabilities(
       }
     }
   };
+}
+
+export function toggleCapabilitySkill(
+  state: AgentBuilderState,
+  skillId: string
+): AgentBuilderState {
+  return {
+    ...state,
+    spec: {
+      ...state.spec,
+      capabilities: {
+        ...state.spec.capabilities,
+        skills: toggleSkillId(state.spec.capabilities.skills, skillId)
+      }
+    }
+  };
+}
+
+export function replaceCapabilitySkills(
+  state: AgentBuilderState,
+  skillIds: string[]
+): AgentBuilderState {
+  return updateCapabilities(state, { skills: skillIds });
 }
 
 export function updateModel(
