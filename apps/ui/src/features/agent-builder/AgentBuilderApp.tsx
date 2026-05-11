@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { validateAgentSpec } from '@thorx/domain';
+import { getStarterSkillById, starterSkillCatalog, validateAgentSpec } from '@thorx/domain';
 import { AppServerClient } from '@thorx/protocol-client';
 import {
   canSubmit,
@@ -12,6 +12,7 @@ import {
   updateModel,
   updateObjective,
   updateSafety,
+  toggleCapabilitySkill,
   wizardSteps
 } from './wizard';
 
@@ -128,22 +129,77 @@ export function AgentBuilderApp() {
 
         {current.id === 'capabilities' && (
           <div className="form-grid">
-            <label>
-              Skills (comma separated)
-              <input
-                onChange={(event) =>
-                  setState((prev) =>
-                    updateCapabilities(prev, {
-                      skills: event.target.value
-                        .split(',')
-                        .map((item) => item.trim())
-                        .filter(Boolean)
-                    })
-                  )
-                }
-                value={state.spec.capabilities.skills.join(', ')}
-              />
-            </label>
+            <div>
+              <div className="section-heading">
+                <h3>Selected skills</h3>
+                <p>Attach starter skills to shape the agent before you wire any MCP servers.</p>
+              </div>
+              <div className="skill-pills">
+                {state.spec.capabilities.skills.length === 0 ? (
+                  <span className="skill-empty">No skills attached yet.</span>
+                ) : (
+                  state.spec.capabilities.skills.map((skillId) => {
+                    const skill = getStarterSkillById(skillId);
+                    return (
+                      <button
+                        className="skill-pill selected"
+                        key={skillId}
+                        onClick={() => setState((prev) => toggleCapabilitySkill(prev, skillId))}
+                        type="button"
+                      >
+                        {skill?.name ?? skillId}
+                        <span aria-hidden="true">×</span>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <div>
+              <div className="section-heading">
+                <h3>Starter skill registry</h3>
+                <p>Choose from the built-in Phase 2 templates or deselect them to refine the agent.</p>
+              </div>
+              <div className="skill-registry">
+                {starterSkillCatalog.map((skill) => {
+                  const selected = state.spec.capabilities.skills.includes(skill.id);
+                  return (
+                    <article className={selected ? 'skill-card selected' : 'skill-card'} key={skill.id}>
+                      <div className="skill-card-header">
+                        <div>
+                          <p className="skill-category">{skill.category}</p>
+                          <h4>{skill.name}</h4>
+                        </div>
+                        <button
+                          className={selected ? 'skill-action selected' : 'skill-action'}
+                          onClick={() => setState((prev) => toggleCapabilitySkill(prev, skill.id))}
+                          type="button"
+                        >
+                          {selected ? 'Attached' : 'Attach'}
+                        </button>
+                      </div>
+                      <p>{skill.description}</p>
+                      <dl className="skill-contract">
+                        <div>
+                          <dt>Input</dt>
+                          <dd>{skill.executionContract.inputShape}</dd>
+                        </div>
+                        <div>
+                          <dt>Output</dt>
+                          <dd>{skill.executionContract.outputShape}</dd>
+                        </div>
+                        <div>
+                          <dt>Notes</dt>
+                          <dd>{skill.executionContract.executionNotes}</dd>
+                        </div>
+                      </dl>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="checkbox-grid">
               <label>
                 <input
@@ -180,6 +236,10 @@ export function AgentBuilderApp() {
                 Web Search
               </label>
             </div>
+            <p className="helper-copy">
+              Available skill templates: {starterSkillCatalog.length}. The default selection starts with{' '}
+              {getStarterSkillById(state.spec.capabilities.skills[0])?.name ?? 'one starter skill'}.
+            </p>
           </div>
         )}
 

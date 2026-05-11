@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { createDefaultAgentSpec, normalizeAgentSpec, validateAgentSpec } from './index';
+import {
+  createDefaultAgentSpec,
+  getStarterSkillById,
+  normalizeAgentSpec,
+  starterSkillCatalog,
+  validateAgentSpec
+} from './index';
 
 describe('AgentSpec validation', () => {
   it('accepts valid default spec', () => {
@@ -48,5 +54,20 @@ describe('AgentSpec normalization', () => {
     const normalized = normalizeAgentSpec(spec);
     expect(normalized.identity.name).toBe('ThorX Agent');
     expect(normalized.objective.successCriteria).toEqual(['One', 'Two']);
+  });
+});
+
+describe('starter skill catalog', () => {
+  it('exposes a stable starter skill registry', () => {
+    expect(starterSkillCatalog).toHaveLength(10);
+    expect(getStarterSkillById('summarization')?.name).toBe('Summarization');
+  });
+
+  it('rejects unknown skills in agent specs', () => {
+    const spec = createDefaultAgentSpec();
+    spec.capabilities.skills = ['summarization', 'unknown-skill'];
+
+    const issues = validateAgentSpec(spec);
+    expect(issues.map((item) => item.path)).toContain('capabilities.skills');
   });
 });
