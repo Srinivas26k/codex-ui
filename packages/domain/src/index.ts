@@ -3,6 +3,29 @@ export type ApprovalMode = 'never' | 'on-request' | 'strict';
 export type SandboxMode = 'read-only' | 'workspace-write' | 'danger-full-access';
 export type ModelProvider = 'ollama' | 'huggingface' | 'openai' | 'custom';
 export type MemoryBackend = 'none' | 'sqlite-vec' | 'qdrant' | 'chroma';
+export type McpTransport = 'stdio' | 'http' | 'sse' | 'custom';
+export type McpAuthMode = 'none' | 'api-key' | 'oauth' | 'command';
+export type McpPermissionProfile = 'read-only' | 'workspace-write' | 'danger-full-access';
+export type McpServerStatus = 'healthy' | 'degraded' | 'offline';
+
+export interface McpToolDefinition {
+  name: string;
+  description: string;
+  enabled: boolean;
+}
+
+export interface McpServerDefinition {
+  id: string;
+  name: string;
+  endpoint: string;
+  transport: McpTransport;
+  authMode: McpAuthMode;
+  permissionProfile: McpPermissionProfile;
+  status: McpServerStatus;
+  latencyMs: number;
+  notes: string;
+  tools: McpToolDefinition[];
+}
 
 export type SkillCategory =
   | 'research'
@@ -212,16 +235,63 @@ export const starterSkillCatalog: SkillDefinition[] = [
   }
 ];
 
-export function getStarterSkillById(skillId: string): SkillDefinition | undefined {
-  return starterSkillCatalog.find((skill) => skill.id === skillId);
-}
+export const starterMcpServers: McpServerDefinition[] = [
+  {
+    id: 'filesystem-bridge',
+    name: 'Filesystem Bridge',
+    endpoint: 'stdio://thorx-filesystem',
+    transport: 'stdio',
+    authMode: 'none',
+    permissionProfile: 'workspace-write',
+    status: 'healthy',
+    latencyMs: 18,
+    notes: 'Local file access with workspace-scoped permissions.',
+    tools: [
+      { name: 'read_file', description: 'Read file contents from the workspace.', enabled: true },
+      { name: 'write_file', description: 'Write or update workspace files.', enabled: true },
+      { name: 'watch_dir', description: 'Observe directory changes for reactive workflows.', enabled: false }
+    ]
+  },
+  {
+    id: 'repo-guardian',
+    name: 'Repo Guardian',
+    endpoint: 'http://localhost:5050/mcp',
+    transport: 'http',
+    authMode: 'api-key',
+    permissionProfile: 'read-only',
+    status: 'degraded',
+    latencyMs: 74,
+    notes: 'Diff review and change tracking for repository operations.',
+    tools: [
+      { name: 'review_diff', description: 'Summarize changes and highlight risks.', enabled: true },
+      { name: 'list_changes', description: 'Enumerate recent file changes.', enabled: true },
+      { name: 'risk_report', description: 'Produce a prioritized risk report.', enabled: false }
+    ]
+  },
+  {
+    id: 'docs-search',
+    name: 'Docs Search',
+    endpoint: 'http://localhost:6090/mcp',
+    transport: 'sse',
+    authMode: 'oauth',
+    permissionProfile: 'read-only',
+    status: 'healthy',
+    latencyMs: 42,
+    notes: 'Search and retrieve local or indexed documentation sources.',
+    tools: [
+      { name: 'search_docs', description: 'Find relevant documentation passages.', enabled: true },
+      { name: 'fetch_page', description: 'Fetch a specific documentation page.', enabled: true },
+      { name: 'summarize_docs', description: 'Summarize documentation for quick review.', enabled: false }
+    ]
+  }
+];
 
-export function normalizeSkillIds(skillIds: string[]): string[] {
+function normalizeUniqueIds(values: string[]): string[] {
   const seen = new Set<string>();
   const normalized: string[] = [];
 
-  for (const skillId of skillIds) {
-    const trimmed = skillId.trim();
+  for (const value of values) {
+    const trimmed = value.trim();
     if (!trimmed || seen.has(trimmed)) {
       continue;
     }
@@ -231,6 +301,18 @@ export function normalizeSkillIds(skillIds: string[]): string[] {
   }
 
   return normalized;
+}
+
+export function getStarterSkillById(skillId: string): SkillDefinition | undefined {
+  return starterSkillCatalog.find((skill) => skill.id === skillId);
+}
+
+export function getStarterMcpServerById(serverId: string): McpServerDefinition | undefined {
+  return starterMcpServers.find((server) => server.id === serverId);
+}
+
+export function normalizeSkillIds(skillIds: string[]): string[] {
+  return normalizeUniqueIds(skillIds);
 }
 
 export function toggleSkillId(skillIds: string[], skillId: string): string[] {
@@ -244,6 +326,23 @@ export function toggleSkillId(skillIds: string[], skillId: string): string[] {
   }
 
   return normalizeSkillIds([...skillIds, trimmed]);
+}
+
+export function normalizeMcpServerIds(serverIds: string[]): string[] {
+  return normalizeUniqueIds(serverIds);
+}
+
+export function toggleMcpServerId(serverIds: string[], serverId: string): string[] {
+  const trimmed = serverId.trim();
+  if (!trimmed) {
+    return normalizeMcpServerIds(serverIds);
+  }
+
+  if (serverIds.includes(trimmed)) {
+    return serverIds.filter((item) => item !== trimmed);
+  }
+
+  return normalizeMcpServerIds([...serverIds, trimmed]);
 }
 
 export function listStarterSkillCategories(): SkillCategory[] {
@@ -317,6 +416,11 @@ export function normalizeAgentSpec(spec: AgentSpec): AgentSpec {
       successCriteria: spec.objective.successCriteria.map((item) => item.trim()).filter(Boolean),
       languageTone: spec.objective.languageTone.trim()
     },
+    capabilities: {
+      ...spec.capabilities,
+      skills: normalizeSkillIds(spec.capabilities.skills),
+      mcpServers: normalizeMcpServerIds(spec.capabilities.mcpServers)
+    },
     modelPolicy: {
       ...spec.modelPolicy,
       preferredModel: spec.modelPolicy.preferredModel.trim()
@@ -328,6 +432,7 @@ export function validateAgentSpec(input: AgentSpec): ValidationIssue[] {
   const spec = normalizeAgentSpec(input);
   const issues: ValidationIssue[] = [];
   const allowedSkills = new Set(starterSkillCatalog.map((skill) => skill.id));
+  const allowedMcpServers = new Set(starterMcpServers.map((server) => server.id));
 
   if (isBlank(spec.identity.name)) {
     issues.push({ path: 'identity.name', message: 'Agent name is required.' });
@@ -365,6 +470,15 @@ export function validateAgentSpec(input: AgentSpec): ValidationIssue[] {
       issues.push({
         path: 'capabilities.skills',
         message: `Unknown skill id: ${skillId}`
+      });
+    }
+  }
+
+  for (const serverId of spec.capabilities.mcpServers) {
+    if (!allowedMcpServers.has(serverId)) {
+      issues.push({
+        path: 'capabilities.mcpServers',
+        message: `Unknown MCP server id: ${serverId}`
       });
     }
   }

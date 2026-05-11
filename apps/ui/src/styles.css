@@ -14,9 +14,66 @@
 
 body {
   margin: 0;
-  background: var(--deep-void);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 30%),
+    var(--deep-void);
   color: var(--warm-parchment);
   font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.workspace-shell {
+  padding: 28px 24px 88px;
+}
+
+.workspace-hero {
+  max-width: 980px;
+  margin: 0 auto 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.workspace-hero h1 {
+  margin: 0;
+  font-family: 'Hanken Grotesk', 'Inter', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+}
+
+.workspace-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.workspace-tab {
+  text-align: left;
+  border: 1px solid var(--mist-border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ash-gray);
+  padding: 14px 16px;
+  display: grid;
+  gap: 4px;
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.workspace-tab span {
+  color: var(--warm-parchment);
+  font-size: 16px;
+}
+
+.workspace-tab small {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.workspace-tab.active {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .page {
@@ -98,6 +155,10 @@ body {
   line-height: 1.45;
 }
 
+.mcp-section-spacing {
+  margin-top: 10px;
+}
+
 .skill-pills {
   display: flex;
   flex-wrap: wrap;
@@ -118,6 +179,7 @@ body {
   color: var(--warm-parchment);
   padding: 8px 12px;
   cursor: pointer;
+  margin-top: 0;
 }
 
 .skill-pill {
@@ -138,6 +200,13 @@ body {
   margin: 12px 0 4px;
 }
 
+.mcp-registry {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin: 12px 0 4px;
+}
+
 .skill-card {
   display: grid;
   gap: 12px;
@@ -152,7 +221,28 @@ body {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.mcp-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--mist-border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mcp-card.selected {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .skill-card-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mcp-card-header {
   display: flex;
   align-items: start;
   justify-content: space-between;
@@ -180,6 +270,12 @@ body {
   line-height: 1.45;
 }
 
+.mcp-card p {
+  margin: 0;
+  color: var(--ash-gray);
+  line-height: 1.45;
+}
+
 .skill-contract {
   gap: 8px;
 }
@@ -191,6 +287,91 @@ body {
 
 .skill-contract dd {
   color: var(--warm-parchment);
+}
+
+.mcp-details {
+  gap: 8px;
+}
+
+.mcp-details dt {
+  color: var(--stone-gray);
+  letter-spacing: 0.12em;
+}
+
+.mcp-details dd {
+  color: var(--warm-parchment);
+}
+
+.mcp-badge {
+  border: 1px solid var(--mist-border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--stone-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.mcp-badge.healthy {
+  color: var(--warm-parchment);
+}
+
+.mcp-card-actions {
+  margin-top: 0;
+}
+
+.mcp-card button {
+  margin-top: 0;
+}
+
+.mcp-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 18px;
+}
+
+.mcp-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.mcp-summary {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--mist-border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mcp-summary p {
+  margin: 0;
+  color: var(--ash-gray);
+  line-height: 1.45;
+}
+
+.mcp-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.mcp-log-list li {
+  border: 1px solid var(--mist-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--ash-gray);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mcp-log-list li.success {
+  color: var(--warm-parchment);
+}
+
+.mcp-log-list li.warning {
+  color: #f3d08c;
 }
 
 .form-grid label {
@@ -312,4 +493,22 @@ button:disabled {
   margin-top: 10px;
   color: #f5c9c9;
   padding-left: 20px;
+}
+
+@media (max-width: 720px) {
+  .workspace-shell {
+    padding-inline: 16px;
+  }
+
+  .workspace-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .mcp-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page {
+    padding-inline: 16px;
+  }
 }

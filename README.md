@@ -58,3 +58,27 @@ You can also use Codex with an API key, but this requires [additional setup](htt
 - [**Open source fund**](./docs/open-source-fund.md)
 
 This repository is licensed under the [Apache-2.0 License](LICENSE).
+
+## ThorX local development
+
+This fork is being developed phase by phase with Bun-based package scripts.
+
+### Compile
+
+```shell
+cd apps/ui && bun run build
+```
+
+### Test
+
+```shell
+cd packages/domain && bun run test
+cd apps/ui && bun run test
+```
+
+### Recommended Phase Check Before Pushing
+
+1. Run the domain tests.
+2. Run the UI tests.
+3. Run the UI build.
+4. Review `git status` and commit the phase slice before pushing the branch.

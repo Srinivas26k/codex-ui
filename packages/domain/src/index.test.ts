@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   createDefaultAgentSpec,
+  getStarterMcpServerById,
   getStarterSkillById,
   normalizeAgentSpec,
+  starterMcpServers,
   starterSkillCatalog,
   validateAgentSpec
 } from './index';
@@ -69,5 +71,20 @@ describe('starter skill catalog', () => {
 
     const issues = validateAgentSpec(spec);
     expect(issues.map((item) => item.path)).toContain('capabilities.skills');
+  });
+});
+
+describe('starter MCP catalog', () => {
+  it('exposes three starter servers for Phase 3', () => {
+    expect(starterMcpServers).toHaveLength(3);
+    expect(getStarterMcpServerById('filesystem-bridge')?.permissionProfile).toBe('workspace-write');
+  });
+
+  it('rejects unknown MCP servers in agent specs', () => {
+    const spec = createDefaultAgentSpec();
+    spec.capabilities.mcpServers = ['filesystem-bridge', 'unknown-server'];
+
+    const issues = validateAgentSpec(spec);
+    expect(issues.map((item) => item.path)).toContain('capabilities.mcpServers');
   });
 });
