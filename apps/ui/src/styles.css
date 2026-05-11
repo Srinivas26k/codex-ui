@@ -57,6 +57,72 @@ body {
   padding: 20px;
 }
 
+.step-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.chip {
+  border: 1px solid var(--mist-border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--stone-gray);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.chip.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--warm-parchment);
+}
+
+.form-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 8px;
+  color: var(--ash-gray);
+}
+
+input,
+select,
+textarea {
+  background: rgba(18, 18, 18, 0.7);
+  border: 1px solid var(--mist-border);
+  border-radius: 10px;
+  color: var(--warm-parchment);
+  padding: 10px 12px;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.checkbox-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.checkbox-grid label,
+.single-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .card h2 {
   margin: 0 0 14px;
   font-size: 22px;
@@ -109,4 +175,31 @@ button {
 button:hover {
   border-color: var(--mist-border);
   color: var(--warm-parchment);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.code-preview {
+  margin: 0;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--mist-border);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--ash-gray);
+  max-height: 280px;
+  overflow: auto;
+}
+
+.status {
+  margin-top: 14px;
+  color: var(--warm-parchment);
+}
+
+.errors {
+  margin-top: 10px;
+  color: #f5c9c9;
+  padding-left: 20px;
 }
