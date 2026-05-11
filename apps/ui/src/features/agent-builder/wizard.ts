@@ -1,10 +1,5 @@
-import {
-  AgentSpec,
-  createDefaultAgentSpec,
-  normalizeSkillIds,
-  toggleSkillId,
-  validateAgentSpec
-} from '@thorx/domain';
+import { createDefaultAgentSpec, normalizeSkillIds, normalizeMcpServerIds, toggleSkillId, toggleMcpServerId, validateAgentSpec } from '@thorx/domain';
+import type { AgentSpec } from '@thorx/domain';
 
 export type WizardStepId =
   | 'identity'
@@ -90,6 +85,7 @@ export function updateCapabilities(
   }
 ): AgentBuilderState {
   const hasSkillsOverride = Object.prototype.hasOwnProperty.call(values, 'skills');
+  const hasMcpOverride = Object.prototype.hasOwnProperty.call(values, 'mcpServers');
   return {
     ...state,
     spec: {
@@ -98,6 +94,9 @@ export function updateCapabilities(
         ...state.spec.capabilities,
         ...values,
         skills: hasSkillsOverride ? normalizeSkillIds(values.skills ?? []) : state.spec.capabilities.skills,
+        mcpServers: hasMcpOverride
+          ? normalizeMcpServerIds(values.mcpServers ?? [])
+          : state.spec.capabilities.mcpServers,
         tools: {
           ...state.spec.capabilities.tools,
           ...(values.tools ?? {})
@@ -128,6 +127,29 @@ export function replaceCapabilitySkills(
   skillIds: string[]
 ): AgentBuilderState {
   return updateCapabilities(state, { skills: skillIds });
+}
+
+export function toggleCapabilityMcpServer(
+  state: AgentBuilderState,
+  serverId: string
+): AgentBuilderState {
+  return {
+    ...state,
+    spec: {
+      ...state.spec,
+      capabilities: {
+        ...state.spec.capabilities,
+        mcpServers: toggleMcpServerId(state.spec.capabilities.mcpServers, serverId)
+      }
+    }
+  };
+}
+
+export function replaceCapabilityMcpServers(
+  state: AgentBuilderState,
+  serverIds: string[]
+): AgentBuilderState {
+  return updateCapabilities(state, { mcpServers: serverIds });
 }
 
 export function updateModel(

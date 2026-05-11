@@ -1,5 +1,11 @@
 import { useMemo, useState } from 'react';
-import { getStarterSkillById, starterSkillCatalog, validateAgentSpec } from '@thorx/domain';
+import {
+  getStarterMcpServerById,
+  getStarterSkillById,
+  starterMcpServers,
+  starterSkillCatalog,
+  validateAgentSpec
+} from '@thorx/domain';
 import { AppServerClient } from '@thorx/protocol-client';
 import {
   canSubmit,
@@ -12,6 +18,7 @@ import {
   updateModel,
   updateObjective,
   updateSafety,
+  toggleCapabilityMcpServer,
   toggleCapabilitySkill,
   wizardSteps
 } from './wizard';
@@ -53,7 +60,7 @@ export function AgentBuilderApp() {
   }
 
   return (
-    <main className="page">
+    <section className="page">
       <header className="hero">
         <p className="label">FORM-FIRST AGENT BUILDER</p>
         <h1>ThorX Agent Initialization</h1>
@@ -200,6 +207,77 @@ export function AgentBuilderApp() {
               </div>
             </div>
 
+            <div>
+              <div className="section-heading">
+                <h3>Selected MCP servers</h3>
+                <p>Attach MCP endpoints so the agent can reach curated tools and services.</p>
+              </div>
+              <div className="skill-pills">
+                {state.spec.capabilities.mcpServers.length === 0 ? (
+                  <span className="skill-empty">No MCP servers attached yet.</span>
+                ) : (
+                  state.spec.capabilities.mcpServers.map((serverId) => {
+                    const server = getStarterMcpServerById(serverId);
+                    return (
+                      <button
+                        className="skill-pill selected"
+                        key={serverId}
+                        onClick={() => setState((prev) => toggleCapabilityMcpServer(prev, serverId))}
+                        type="button"
+                      >
+                        {server?.name ?? serverId}
+                        <span aria-hidden="true">×</span>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <div>
+              <div className="section-heading">
+                <h3>Starter MCP catalog</h3>
+                <p>Pick from three built-in endpoints to prototype permissions and tool access.</p>
+              </div>
+              <div className="mcp-registry">
+                {starterMcpServers.map((server) => {
+                  const selected = state.spec.capabilities.mcpServers.includes(server.id);
+                  return (
+                    <article className={selected ? 'mcp-card selected' : 'mcp-card'} key={server.id}>
+                      <div className="skill-card-header">
+                        <div>
+                          <p className="skill-category">{server.transport} / {server.permissionProfile}</p>
+                          <h4>{server.name}</h4>
+                        </div>
+                        <button
+                          className={selected ? 'skill-action selected' : 'skill-action'}
+                          onClick={() => setState((prev) => toggleCapabilityMcpServer(prev, server.id))}
+                          type="button"
+                        >
+                          {selected ? 'Attached' : 'Attach'}
+                        </button>
+                      </div>
+                      <p>{server.notes}</p>
+                      <dl className="skill-contract">
+                        <div>
+                          <dt>Endpoint</dt>
+                          <dd>{server.endpoint}</dd>
+                        </div>
+                        <div>
+                          <dt>Status</dt>
+                          <dd>{server.status}</dd>
+                        </div>
+                        <div>
+                          <dt>Tools</dt>
+                          <dd>{server.tools.filter((tool) => tool.enabled).length} enabled</dd>
+                        </div>
+                      </dl>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="checkbox-grid">
               <label>
                 <input
@@ -237,7 +315,8 @@ export function AgentBuilderApp() {
               </label>
             </div>
             <p className="helper-copy">
-              Available skill templates: {starterSkillCatalog.length}. The default selection starts with{' '}
+              Available skill templates: {starterSkillCatalog.length}. Available MCP servers:{' '}
+              {starterMcpServers.length}. The default selection starts with{' '}
               {getStarterSkillById(state.spec.capabilities.skills[0])?.name ?? 'one starter skill'}.
             </p>
           </div>
@@ -412,6 +491,6 @@ export function AgentBuilderApp() {
           </ul>
         )}
       </section>
-    </main>
+    </section>
   );
 }

@@ -8,6 +8,7 @@ import {
   updateCapabilities,
   updateIdentity,
   updateMemory,
+  toggleCapabilityMcpServer,
   toggleCapabilitySkill
 } from './wizard';
 
@@ -60,5 +61,13 @@ describe('wizard state updates', () => {
     });
 
     expect(state.spec.capabilities.skills).toEqual(['summarization', 'web-research-brief']);
+  });
+
+  it('attaches and removes MCP servers', () => {
+    const connected = toggleCapabilityMcpServer(createInitialState(), 'filesystem-bridge');
+    expect(connected.spec.capabilities.mcpServers).toContain('filesystem-bridge');
+
+    const disconnected = toggleCapabilityMcpServer(connected, 'filesystem-bridge');
+    expect(disconnected.spec.capabilities.mcpServers).not.toContain('filesystem-bridge');
   });
 });

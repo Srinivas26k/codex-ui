@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { AgentBuilderApp } from './features/agent-builder/AgentBuilderApp';
+import { ThorxWorkspaceApp } from './features/workbench/ThorxWorkspaceApp';
 import './styles.css';
 
-createRoot(document.getElementById('root')!).render(<AgentBuilderApp />);
+createRoot(document.getElementById('root')!).render(<ThorxWorkspaceApp />);
